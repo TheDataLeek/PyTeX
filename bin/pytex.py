@@ -26,7 +26,5 @@ class PyTexDocument:
             self.outfile.write('%s, ' %options[number])
         self.outfile.write('%s]{%s}\n' %(options[len(options) - 1], doc_class))
 
-        self.outfile.write('\\begin%s{%s}\n' %(options, doc_class))
-
 
 
