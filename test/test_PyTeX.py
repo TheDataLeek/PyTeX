@@ -18,19 +18,20 @@ class TestPyTeX(unittest.TestCase):
         unittest.TestCase.__init__(self, *args, **kwargs)
 
     def setUp(self):
-        self.testDocument1 = pytex.PyTexDocument(name='1.tex',
+        self.document1 = pytex.PyTexDocument(name='1.tex',
                                                 packages=[['geometry', 'margin=1in'],['times']])
-        self.testDocument2 = pytex.PyTexDocument(name='2.tex')
-        self.testDocument3 = pytex.PyTexDocument(name='3.tex',
+        self.document2 = pytex.PyTexDocument(name='2.tex')
+        self.document3 = pytex.PyTexDocument(name='3.tex',
                                                 doc_class='article',
                                                 packages=[['geometry', 'margin=1in'],['times']])
 
     def tearDown(self):
         os.system("for FILE in `find . -maxdepth 1 -type f | grep -e 'aux\|log'`; do mv $FILE ./logs/; done")
+        os.system("for FILE in `find . -maxdepth 1 -type f | grep -e 'pdf\|tex'`; do mv $FILE ./old/; done")
 
     def test_basic_document(self):
-        self.testDocument1.raw_latex('test string\n')
-        self.testDocument1.write()
+        self.document1.raw_latex('test string\n')
+        self.document1.write()
         lines = self.get_line_list('1.tex')
         assert(lines == ['\\documentclass[10pt]{report}\n',
                         '\\usepackage[margin=1in]{geometry}\n',
@@ -40,8 +41,8 @@ class TestPyTeX(unittest.TestCase):
                         '\\end{document}'])
 
     def test_title(self):
-        self.testDocument2.title(title='Test Document', author='William Farmer')
-        self.testDocument2.write()
+        self.document2.title(title='Test Document', author='William Farmer')
+        self.document2.write()
         lines = self.get_line_list('2.tex')
         assert(lines == ['\\documentclass[10pt]{report}\n',
                         '\\usepackage[margin=1in]{geometry}\n',
@@ -53,12 +54,26 @@ class TestPyTeX(unittest.TestCase):
                         '\\end{document}'])
 
     def test_table(self):
+        self.document3.title()
         array = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-        self.testDocument3.table(array)
-        self.testDocument3.write()
+        self.document3.table(array)
+        self.document3.write()
         lines = self.get_line_list('3.tex')
-        print(lines)
-        print(lines)
+        logging.info(lines)
+        assert(lines == ['\\documentclass[10pt]{article}\n',
+                        '\\usepackage[margin=1in]{geometry}\n',
+                        '\\usepackage{times}\n',
+                        '\\begin{document}\n',
+                        '\\title{Insert Title Here}\n',
+                        '\\author{Insert Name Here}\n',
+                        '\\date{\\today}\n',
+                        '\\maketitle\n',
+                        '\\begin{tabular}{l | l | l}\n',
+                        '1 & 2 & 3\\\\\n',
+                        '4 & 5 & 6\\\\\n',
+                        '7 & 8 & 9\\\\\n',
+                        '\\end{tabular}\n',
+                        '\\end{document}'])
 
     def get_line_list(self, name):
         outfile = open(name, mode='r')

@@ -55,11 +55,11 @@ class PyTexDocument:
             for number in range(1, len(entry)):
                 self.outfile.write(' & %s' %(entry[number]))
             self.outfile.write('\\\\\n')
-        self.outfile.write('\\end{tabular}')
+        self.outfile.write('\\end{tabular}\n')
 
     def write(self):
         self.outfile.write('\\end{document}')
         self.outfile.close()
-        subprocess.Popen(['pdflatex', '--shell-escape', self.name])
+        #subprocess.Popen(['pdflatex', '--shell-escape', self.name])
         os.system('pdflatex --shell-escape %s' %self.name)
 
