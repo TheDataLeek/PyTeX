@@ -57,6 +57,12 @@ class PyTexDocument:
             self.outfile.write('\\\\\n')
         self.outfile.write('\\end{tabular}\n')
 
+    def graph(self, array, options=[[]]):
+        '''
+        Creates graph of given data
+        '''
+        print(array)
+
     def write(self):
         self.outfile.write('\\end{document}')
         self.outfile.close()

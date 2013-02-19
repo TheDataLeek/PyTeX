@@ -3,7 +3,6 @@
 import pytex
 import os
 import unittest
-import sys
 import logging
 
 open('./logs/test.log', mode='a').close()
@@ -13,6 +12,10 @@ logging.basicConfig(filename='./logs/test.log',
 logging.info('Start Test Sequence\n')
 
 class TestPyTeX(unittest.TestCase):
+    '''
+    Unittest for PyTeX
+    Tests currently implemented functions
+    '''
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
