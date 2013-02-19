@@ -17,17 +17,14 @@ class TestPyTeX(unittest.TestCase):
         unittest.TestCase.__init__(self, *args, **kwargs)
 
     def setUp(self):
-        self.testDocument = pytex.PyTexDocument()
-
-    def test_doc_type(self):
-        self.testDocument.doc_type()
-        line_list = self.get_line_list()
-        assert(line_list[0] == '\\begin[10pt]{report}')
+        self.testDocument1 = pytex.PyTexDocument()
+        self.testDocument2 = pytex.PyTexDocument()
+        self.testDocument3 = pytex.PyTexDocument()
 
     def get_line_list(self):
         outfile = open('out.tex', mode='r')
         line_list = []
-        print outfile.readlines()
+        print(outfile.readlines())
 #        for item in outfile.readlines:
 #            line_list.append(item)
         outfile.close()

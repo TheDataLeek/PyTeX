@@ -12,7 +12,7 @@ class PyTexDocument(doc_class='report', options=['10pt'], packages=[['geometry',
     LaTeX API Document Class Object
     '''
 
-    def __init__(self):
+    def __init__(self, doc_class, options, packages):
         '''
         Defines the file to work on as well as options
         '''
@@ -27,9 +27,9 @@ class PyTexDocument(doc_class='report', options=['10pt'], packages=[['geometry',
         for array in packages:
             for item in array:
                 if item[1]:
-                    self.outfile.wite('\\usepackage[%s]{%s}\n' %(item[1], item[0]))
+                    self.outfile.write('\\usepackage[%s]{%s}\n' %(item[1], item[0]))
                 else:
-                    self.outfile.wite('\\usepackage{%s}\n' %item[0])
+                    self.outfile.write('\\usepackage{%s}\n' %item[0])
         self.outfile.write('\\begin{document}\n')
 
     def title(self, title='Insert Title Here', author='Insert Name Here', date='\\date'):
