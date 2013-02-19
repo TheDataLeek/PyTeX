@@ -6,6 +6,7 @@ William Farmer
 '''
 
 import subprocess
+import os
 
 class PyTexDocument:
     '''
@@ -40,5 +41,12 @@ class PyTexDocument:
     def write(self):
         self.outfile.write('\\end{document}')
         self.outfile.close()
-        subprocess.Popen('pdflatex')
+        subprocess.Popen(['pdflatex', '--shell-escape', self.name])
+        os.system('pdflatex --shell-escape %s' %self.name)
+
+    def raw_latex(self, latex):
+        '''
+        Allows the user to write raw LaTeX to the document
+        '''
+        self.outfile.write(latex)
 

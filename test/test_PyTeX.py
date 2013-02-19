@@ -29,12 +29,14 @@ class TestPyTeX(unittest.TestCase):
         os.system("for FILE in `find . -maxdepth 1 -type f | grep -e 'aux\|log'`; do mv $FILE ./logs/; done")
 
     def test_basic_document(self):
+        self.testDocument1.raw_latex('test string\n')
         self.testDocument1.write()
         lines = self.get_line_list('1.tex')
         assert(lines == ['\\documentclass[10pt]{report}\n',
                         '\\usepackage[margin=1in]{geometry}\n',
                         '\\usepackage{times}\n',
                         '\\begin{document}\n',
+                        'test string\n',
                         '\\end{document}'])
 
     def test_title(self):
