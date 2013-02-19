@@ -19,7 +19,7 @@ class PyTexDocument:
         self.name = name
         self.outfile = open(self.name, mode='w')
 
-        self.outfile.write('\\begin[')
+        self.outfile.write('\\documentclass[')
         for number in range(len(options) - 2):
             self.outfile.write('%s, ' %options[number])
         self.outfile.write('%s]{%s}\n' %(options[len(options) - 1], doc_class))
@@ -31,15 +31,11 @@ class PyTexDocument:
                 self.outfile.write('\\usepackage{%s}\n' %item[0])
         self.outfile.write('\\begin{document}\n')
 
-    def title(self, title='Insert Title Here', author='Insert Name Here', date='\\date'):
+    def title(self, title='Insert Title Here', author='Insert Name Here', date='\\today'):
         '''
         Define and make the title
         '''
-        self.outfile.write('''\\title{%s}\n
-                            \\author{%s}\n
-                            \\date{%s}\n
-                            \\maketitle\n'''
-                            %(title, author, date))
+        self.outfile.write('''\\title{%s}\n\\author{%s}\n\\date{%s}\n\\maketitle\n''' %(title, author, date))
 
     def write(self):
         self.outfile.write('\\end{document}')
