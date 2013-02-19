@@ -7,16 +7,16 @@ William Farmer
 
 import subprocess
 
-class PyTexDocument(doc_class='report', options=['10pt'], packages=[['geometry', 'margin=1in']]):
+class PyTexDocument:
     '''
     LaTeX API Document Class Object
     '''
 
-    def __init__(self, doc_class, options, packages):
+    def __init__(self, name='out.tex', doc_class='report', options=['10pt'], packages=[['geometry', 'margin=1in']]):
         '''
         Defines the file to work on as well as options
         '''
-        self.name = 'out.tex'
+        self.name = name
         self.outfile = open(self.name, mode='w')
 
         self.outfile.write('\\begin[')
@@ -24,12 +24,11 @@ class PyTexDocument(doc_class='report', options=['10pt'], packages=[['geometry',
             self.outfile.write('%s, ' %options[number])
         self.outfile.write('%s]{%s}\n' %(options[len(options) - 1], doc_class))
 
-        for array in packages:
-            for item in array:
-                if item[1]:
-                    self.outfile.write('\\usepackage[%s]{%s}\n' %(item[1], item[0]))
-                else:
-                    self.outfile.write('\\usepackage{%s}\n' %item[0])
+        for item in packages:
+            try:
+                self.outfile.write('\\usepackage[%s]{%s}\n' %(item[1], item[0]))
+            except IndexError:
+                self.outfile.write('\\usepackage{%s}\n' %item[0])
         self.outfile.write('\\begin{document}\n')
 
     def title(self, title='Insert Title Here', author='Insert Name Here', date='\\date'):
@@ -43,6 +42,7 @@ class PyTexDocument(doc_class='report', options=['10pt'], packages=[['geometry',
                             %(title, author, date))
 
     def write(self):
+        self.outfile.write('\\end{document}')
         self.outfile.close()
         subprocess.Popen('pdflatex')
 

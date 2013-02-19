@@ -17,16 +17,25 @@ class TestPyTeX(unittest.TestCase):
         unittest.TestCase.__init__(self, *args, **kwargs)
 
     def setUp(self):
-        self.testDocument1 = pytex.PyTexDocument()
-        self.testDocument2 = pytex.PyTexDocument()
-        self.testDocument3 = pytex.PyTexDocument()
+        self.testDocument1 = pytex.PyTexDocument(name='1.tex', packages=[['geometry', 'margin=1in'],['times']])
+        self.testDocument2 = pytex.PyTexDocument(name='2.tex')
+        self.testDocument3 = pytex.PyTexDocument(name='3.tex', doc_class='article',
+                                                packages=[['geometry', 'margin=1in'],['times']])
 
-    def get_line_list(self):
-        outfile = open('out.tex', mode='r')
+    def test_basic_document(self):
+        self.testDocument1.write()
+        lines = self.get_line_list('1.tex')
+        assert(lines == ['\\begin[10pt]{report}\n',
+                        '\\usepackage[margin=1in]{geometry}\n',
+                        '\\usepackage{times}\n',
+                        '\\begin{document}\n',
+                        '\\end{document}'])
+
+    def get_line_list(self, name):
+        outfile = open(name, mode='r')
         line_list = []
-        print(outfile.readlines())
-#        for item in outfile.readlines:
-#            line_list.append(item)
+        for item in outfile.readlines():
+            line_list.append(item)
         outfile.close()
         return line_list
 
