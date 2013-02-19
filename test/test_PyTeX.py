@@ -52,6 +52,13 @@ class TestPyTeX(unittest.TestCase):
                         '\\maketitle\n',
                         '\\end{document}'])
 
+    def test_table(self):
+        array = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        self.testDocument3.table(array)
+        self.testDocument3.write()
+        lines = self.get_line_list('3.tex')
+        print(lines)
+
     def get_line_list(self, name):
         outfile = open(name, mode='r')
         line_list = []

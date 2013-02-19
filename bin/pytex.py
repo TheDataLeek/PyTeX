@@ -38,15 +38,28 @@ class PyTexDocument:
         '''
         self.outfile.write('''\\title{%s}\n\\author{%s}\n\\date{%s}\n\\maketitle\n''' %(title, author, date))
 
-    def write(self):
-        self.outfile.write('\\end{document}')
-        self.outfile.close()
-        subprocess.Popen(['pdflatex', '--shell-escape', self.name])
-        os.system('pdflatex --shell-escape %s' %self.name)
-
     def raw_latex(self, latex):
         '''
         Allows the user to write raw LaTeX to the document
         '''
         self.outfile.write(latex)
+
+    def table(self, array):
+        '''
+        Writes a table
+        '''
+        size = len(array[0])
+        self.outfile.write('\\begin{tabular}{l%s}\n' %((size - 1) * ' | l'))
+        for entry in array:
+            self.outfile.write(str(entry[0]))
+            for number in range(1, len(entry)):
+                self.outfile.write(' & %s' %(entry[number]))
+            self.outfile.write('\\\\\n')
+        self.outfile.write('\\end{tabular}')
+
+    def write(self):
+        self.outfile.write('\\end{document}')
+        self.outfile.close()
+        subprocess.Popen(['pdflatex', '--shell-escape', self.name])
+        os.system('pdflatex --shell-escape %s' %self.name)
 
