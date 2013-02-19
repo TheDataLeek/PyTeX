@@ -58,6 +58,7 @@ class TestPyTeX(unittest.TestCase):
         self.testDocument3.write()
         lines = self.get_line_list('3.tex')
         print(lines)
+        print(lines)
 
     def get_line_list(self, name):
         outfile = open(name, mode='r')
