@@ -32,6 +32,11 @@ class TestPyTeX(unittest.TestCase):
         os.system("for FILE in `find . -maxdepth 1 -type f | grep -e 'aux\|log'`; do mv $FILE ./logs/; done")
         os.system("for FILE in `find . -maxdepth 1 -type f | grep -e 'pdf\|tex'`; do mv $FILE ./old/; done")
 
+    def test_graph(self):
+        array = [[0, 1, 2, 3, 4], [9, 8, 7, 6, 5]]
+        self.document1.graph(array)
+
+
     def test_basic_document(self):
         self.document1.raw_latex('test string\n')
         self.document1.write()

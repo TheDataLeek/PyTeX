@@ -5,7 +5,16 @@ William Farmer
 2013
 """
 
+IMPORT_FLAG = True
 import os
+import subprocess
+try:
+    import numpy
+    import scipy
+    import pylab
+except RuntimeError:
+    IMPORT_FLAG = False
+    print('Python 3.2.3 Not Supported')
 
 
 class PyTexDocument:
@@ -70,15 +79,34 @@ class PyTexDocument:
             self.outfile.write('\\\\\n')
         self.outfile.write('\\end{tabular}\n')
 
+    def equation(self, latex_math, label=None):
+        '''
+        Insert a new equation. Equation must be in LaTeX Form.
+        :param latex_math:
+        '''
+        if label:
+            label.replace(' ', '')
+            self.outfile.write('\\begin{equation}\\label{eq:%s}\n' %label)
+        else:
+            self.outfile.write('\\begin{equation}\n')
+        self.outfile.write('\\begin{aligned}\n')
+        self.raw_latex(latex_math)
+        self.outfile.write('\\end{aligned}\n')
+        self.outfile.write('\\end{equation}\n')
+
     def graph(self, array, options=None):
         '''
         Creates graph of given data
         :param array:
         :param options:
         '''
-        if not options:
-            options = [[]]
-        print(array)
+        if IMPORT_FLAG:
+            if not options:
+                options = [[]]
+            print(array)
+            pylab.plot(array[0], array[1])
+            pylab.show()
+
 
     def write(self):
         '''
@@ -88,4 +116,20 @@ class PyTexDocument:
         self.outfile.close()
         #subprocess.Popen(['pdflatex', '--shell-escape', self.name])
         os.system('pdflatex --shell-escape %s' % self.name)
+
+    def picture(self, filename, scale=0.5, label=None, caption=None):
+        '''
+        Insert a picture. Needs to be png
+        :param filename:
+        :param label:
+        :param caption:
+        '''
+        self.outfile.write('\\begin{figure}[ht]\n')
+        self.outfile.write('\\centering\n')
+        self.outfile.write('\\includegraphics[scale=%f]{%s}\n' %(scale, filename))
+        if label:
+            self.outfile.write('\\label{fig:%s}\n' %label)
+        if caption:
+            self.outfile.write('\\caption{%s}\n' %caption)
+        self.outfile.write('\\end{figure}\n')
 
