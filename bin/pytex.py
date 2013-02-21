@@ -5,18 +5,96 @@ William Farmer
 2013
 """
 
-IMPORT_FLAG = True
 import os
-import subprocess
 import re
-try:
-    import numpy
-    import scipy
-    import pylab
-except RuntimeError:
-    IMPORT_FLAG = False
-    print('Python 3.2.3 Not Supported')
 
+def raw_latex(latex, content):
+    '''
+    Allows the user to write raw LaTeX to the document
+    :param latex:
+    :param content:
+    '''
+    content += latex
+
+def picture(filename, content, scale=0.5, label=None, caption=None):
+    '''
+    Insert a picture. Needs to be png
+    :param filename:
+    :param content:
+    :param scale:
+    :param label:
+    :param caption:
+    '''
+    content += ('\\begin{figure}[ht]\n' +
+                '\\centering\n' +
+                '\\includegraphics[scale=%f]{%s}\n' %(scale, filename))
+    if label:
+        content += '\\label{fig:%s}\n' %label
+    if caption:
+        content += '\\caption{%s}\n' %caption
+    content += '\\end{figure}\n'
+
+def table(array, content):
+    '''
+    Writes a table
+    :param array:
+    :param content:
+    '''
+    size = len(array[0])
+    content += ('\\begin{tabular}{l%s}\n' % ((size - 1) * ' | l'))
+    for entry in array:
+        formatted_array = self.detect_math(entry)
+        content += (str(formatted_array[0]))
+        for number in range(1, len(formatted_array)):
+            content += (' & %s' % (formatted_array[number]))
+        content += ('\\\\\n')
+    content += ('\\end{tabular}\n')
+
+def math(math, content, newline=False):
+    '''
+    Inserts inline math. Math must be in LaTeX form.
+    :param math:
+    :param content:
+    :param newline:
+    '''
+    if newline:
+        content += ('\\[\n')
+        content += ('\\begin{aligned}\n')
+        self.raw_latex(math)
+        content += ('\\end{aligned}\n')
+        content += ('\\]\n')
+    else:
+        content += ('$ %s $' %math)
+
+def detect_math(entry):
+    '''
+    When given a list of strings, it detects any math bits and returns.
+    :param entry:
+    '''
+    formatted_list = []
+    for item in entry:
+        if re.search('[0-9\+\-\=\*\^]', str(item)):
+            formatted_list.append('$%s$' %item)
+        else:
+            formatted_list.append(item)
+    return formatted_list
+
+def equation(latex_math, content, label=None):
+    '''
+    Insert a new equation. Equation must be in LaTeX Form.
+    :param latex_math:
+    :param content:
+    :param label:
+    '''
+    if label:
+        label.replace(' ', '')
+        content += ('\\begin{equation}\\label{eq:%s}\n' %label)
+    else:
+        content += ('\\begin{equation}\n')
+    content += ('\\begin{aligned}\n')
+    self.raw_latex(latex_math)
+    content += ('\\end{aligned}\n')
+    content += ('\\end{equation}\n')
 
 class PyTexDocument:
     '''
@@ -49,6 +127,7 @@ class PyTexDocument:
             except IndexError:
                 self.outfile.write('\\usepackage{%s}\n' % item[0])
         self.outfile.write('\\begin{document}\n')
+        self.contents = ''
 
     def title(self, title='Insert Title Here', author='Insert Name Here', date='\\today'):
         '''
@@ -57,145 +136,30 @@ class PyTexDocument:
         :param author:
         :param date:
         '''
-        self.outfile.write('''\\title{%s}\n\\author{%s}\n\\date{%s}\n\\maketitle\n''' % (title, author, date))
-
-    def raw_latex(self, latex):
-        '''
-        Allows the user to write raw LaTeX to the document
-        :param latex:
-        '''
-        self.outfile.write(latex)
-
-    def table(self, array):
-        '''
-        Writes a table
-        :param array:
-        '''
-        size = len(array[0])
-        self.outfile.write('\\begin{tabular}{l%s}\n' % ((size - 1) * ' | l'))
-        for entry in array:
-            formatted_array = self.detect_math(entry)
-            self.outfile.write(str(formatted_array[0]))
-            for number in range(1, len(formatted_array)):
-                self.outfile.write(' & %s' % (formatted_array[number]))
-            self.outfile.write('\\\\\n')
-        self.outfile.write('\\end{tabular}\n')
-
-    def detect_math(self, entry):
-        '''
-        When given a list of strings, it detects any math bits and returns.
-        :param entry:
-        '''
-        formatted_list = []
-        for item in entry:
-            if re.search('[0-9\+\-\=\*\^]', str(item)):
-                formatted_list.append('$%s$' %item)
-            else:
-                formatted_list.append(item)
-        return formatted_list
-
-    def equation(self, latex_math, label=None):
-        '''        self.outfile.write('\\subsubsection{%s}\n' %title)
-        Insert a new equation. Equation must be in LaTeX Form.
-        :param latex_math:
-        '''
-        if label:
-            label.replace(' ', '')
-            self.outfile.write('\\begin{equation}\\label{eq:%s}\n' %label)
-        else:
-            self.outfile.write('\\begin{equation}\n')
-        self.outfile.write('\\begin{aligned}\n')
-        self.raw_latex(latex_math)
-        self.outfile.write('\\end{aligned}\n')
-        self.outfile.write('\\end{equation}\n')
-
-    def math(self, math, newline=False):
-        '''
-        Inserts inline math. Math must be in LaTeX form.
-        :param math:
-        :param newline:
-        '''
-        if newline:
-            self.outfile.write('\\[\n')
-            self.outfile.write('\\begin{aligned}\n')
-            self.raw_latex(math)
-            self.outfile.write('\\end{aligned}\n')
-            self.outfile.write('\\]\n')
-        else:
-            self.outfile.write('$ %s $' %math)
-
-    def graph(self, array, options=None):
-        '''
-        Creates graph of given data
-        :param array:
-        :param options:
-        '''
-        if IMPORT_FLAG:
-            if not options:
-                options = [[]]
-            print(array)
-            pylab.plot(array[0], array[1])
-            pylab.show()
-
+        self.content += ('\\title{%s}\n\\author{%s}\n\\date{%s}\n\\maketitle\n' % (title, author, date))
 
     def write(self):
         '''
         End the document, close the file, and compile the pdf
         '''
+        self.outfile.write(self.contents)
         self.outfile.write('\\end{document}')
         self.outfile.close()
-        #subprocess.Popen(['pdflatex', '--shell-escape', self.name])
         os.system('pdflatex --shell-escape %s' % self.name)
 
-    def picture(self, filename, scale=0.5, label=None, caption=None):
+    class Section:
         '''
-        Insert a picture. Needs to be png
-        :param filename:
-        :param label:
-        :param caption:
+        Creates a new section
         '''
-        self.outfile.write('\\begin{figure}[ht]\n')
-        self.outfile.write('\\centering\n')
-        self.outfile.write('\\includegraphics[scale=%f]{%s}\n' %(scale, filename))
-        if label:
-            self.outfile.write('\\label{fig:%s}\n' %label)
-        if caption:
-            self.outfile.write('\\caption{%s}\n' %caption)
-        self.outfile.write('\\end{figure}\n')
 
-    def section(self, title='Section Title', contents=None):
-        '''
-        Creates a new section and writes contents
-        If no new sections are created, it will have everything in this one.
-        Note, contents are added in the order of the list.
-        :param title:
-        :param contents:
-        '''
-        self.outfile.write('\\section{%s}\n' %title)
-
-    def subsection(self, title='Subsection Title', contents=None):
-        '''
-        Creates a new subsection and writes contents
-        If no new subsections are created, it will have everything in this one.
-        Note, contents are added in the order of the list.
-        :param title:
-        :param contents:
-        '''
-        self.outfile.write('\\subsection{%s}\n' %title)
-
-    def subsubsection(self, title='Subsubsection Title', contents=None):
-        '''
-        Creates a new subsubsection and writes contents
-        If no new subsubsections are created, it will have everything in this one.
-        Note, contents are added in the order of the list.
-        :param title:
-        :param contents:
-        '''
-        self.outfile.write('\\subsubsection{%s}\n' %title)
-
-    def appendix(self, contents):
-        '''
-        Creates a new appendix. Note, the appendix needs sections.
-        :param contents:
-        '''
-        self.outfile.write('\\begin{appendix}\n' %title)
+        def __init__(self, title=None, numbered=True):
+            '''
+            Initializes Class for usage
+            :param title:
+            :param numbered:
+            '''
+            if numbered:
+                sec = ''
+            else:
+                sec = '*'
+            self.contents = ('\\section%s{%s}\n' %(title, sec))
