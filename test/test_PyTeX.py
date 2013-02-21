@@ -63,11 +63,12 @@ class TestPyTeX(unittest.TestCase):
 
     def test_table(self):
         self.document3.title()
-        array = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        array = [[1, 2, 3], [4, 5, 6], [7, 8, 9], ['a', 'b', 'c']]
         self.document3.table(array)
         self.document3.write()
         lines = self.get_line_list('3.tex')
-        logging.info(lines)
+        for item in lines:
+            logging.debug(item)
         assert(lines == ['\\documentclass[10pt]{article}\n',
                         '\\usepackage[margin=1in]{geometry}\n',
                         '\\usepackage{times}\n',
@@ -77,9 +78,10 @@ class TestPyTeX(unittest.TestCase):
                         '\\date{\\today}\n',
                         '\\maketitle\n',
                         '\\begin{tabular}{l | l | l}\n',
-                        '1 & 2 & 3\\\\\n',
-                        '4 & 5 & 6\\\\\n',
-                        '7 & 8 & 9\\\\\n',
+                        '$1$ & $2$ & $3$\\\\\n',
+                        '$4$ & $5$ & $6$\\\\\n',
+                        '$7$ & $8$ & $9$\\\\\n',
+                        'a & b & c\\\\\n',
                         '\\end{tabular}\n',
                         '\\end{document}'])
 

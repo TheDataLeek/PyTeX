@@ -75,9 +75,9 @@ class PyTexDocument:
         self.outfile.write('\\begin{tabular}{l%s}\n' % ((size - 1) * ' | l'))
         for entry in array:
             formatted_array = self.detect_math(entry)
-            self.outfile.write(str(entry[0]))
-            for number in range(1, len(entry)):
-                self.outfile.write(' & %s' % (entry[number]))
+            self.outfile.write(str(formatted_array[0]))
+            for number in range(1, len(formatted_array)):
+                self.outfile.write(' & %s' % (formatted_array[number]))
             self.outfile.write('\\\\\n')
         self.outfile.write('\\end{tabular}\n')
 
@@ -88,11 +88,7 @@ class PyTexDocument:
         '''
         formatted_list = []
         for item in entry:
-            math_flag = False
-            for byte in item:
-                if re.search('0-9', byte):
-                    math_flag = True
-            if math_flag:
+            if re.search('[0-9\+\-\=\*\^]', str(item)):
                 formatted_list.append('$%s$' %item)
             else:
                 formatted_list.append(item)
