@@ -8,6 +8,7 @@ William Farmer
 import os
 import re
 
+
 def raw_latex(latex, content):
     '''
     Allows the user to write raw LaTeX to the document
@@ -15,6 +16,7 @@ def raw_latex(latex, content):
     :param content:
     '''
     content += latex
+
 
 def picture(filename, content, scale=0.5, label=None, caption=None):
     '''
@@ -27,12 +29,13 @@ def picture(filename, content, scale=0.5, label=None, caption=None):
     '''
     content += ('\\begin{figure}[ht]\n' +
                 '\\centering\n' +
-                '\\includegraphics[scale=%f]{%s}\n' %(scale, filename))
+                '\\includegraphics[scale=%f]{%s}\n' % (scale, filename))
     if label:
-        content += '\\label{fig:%s}\n' %label
+        content += '\\label{fig:%s}\n' % label
     if caption:
-        content += '\\caption{%s}\n' %caption
+        content += '\\caption{%s}\n' % caption
     content += '\\end{figure}\n'
+
 
 def table(array, content):
     '''
@@ -43,12 +46,13 @@ def table(array, content):
     size = len(array[0])
     content += ('\\begin{tabular}{l%s}\n' % ((size - 1) * ' | l'))
     for entry in array:
-        formatted_array = self.detect_math(entry)
+        formatted_array = detect_math(entry)
         content += (str(formatted_array[0]))
         for number in range(1, len(formatted_array)):
             content += (' & %s' % (formatted_array[number]))
         content += ('\\\\\n')
     content += ('\\end{tabular}\n')
+
 
 def math(math, content, newline=False):
     '''
@@ -60,11 +64,12 @@ def math(math, content, newline=False):
     if newline:
         content += ('\\[\n')
         content += ('\\begin{aligned}\n')
-        self.raw_latex(math)
+        raw_latex(math)
         content += ('\\end{aligned}\n')
         content += ('\\]\n')
     else:
-        content += ('$ %s $' %math)
+        content += ('$ %s $' % math)
+
 
 def detect_math(entry):
     '''
@@ -74,10 +79,11 @@ def detect_math(entry):
     formatted_list = []
     for item in entry:
         if re.search('[0-9\+\-\=\*\^]', str(item)):
-            formatted_list.append('$%s$' %item)
+            formatted_list.append('$%s$' % item)
         else:
             formatted_list.append(item)
     return formatted_list
+
 
 def equation(latex_math, content, label=None):
     '''
@@ -88,13 +94,14 @@ def equation(latex_math, content, label=None):
     '''
     if label:
         label.replace(' ', '')
-        content += ('\\begin{equation}\\label{eq:%s}\n' %label)
+        content += ('\\begin{equation}\\label{eq:%s}\n' % label)
     else:
         content += ('\\begin{equation}\n')
     content += ('\\begin{aligned}\n')
-    self.raw_latex(latex_math)
+    raw_latex(latex_math)
     content += ('\\end{aligned}\n')
     content += ('\\end{equation}\n')
+
 
 class PyTexDocument:
     '''
@@ -109,6 +116,8 @@ class PyTexDocument:
         :param options:
         :param packages:
         '''
+        self.contents     = ''
+        self.sections = []
         if not packages:
             packages = [['geometry', 'margin=1in']]
         if not options:
@@ -127,7 +136,6 @@ class PyTexDocument:
             except IndexError:
                 self.outfile.write('\\usepackage{%s}\n' % item[0])
         self.outfile.write('\\begin{document}\n')
-        self.contents = ''
 
     def title(self, title='Insert Title Here', author='Insert Name Here', date='\\today'):
         '''
@@ -143,11 +151,28 @@ class PyTexDocument:
         End the document, close the file, and compile the pdf
         '''
         self.outfile.write(self.contents)
+        for item in self.sections:
+            self.outfile.write(item.contents)
         self.outfile.write('\\end{document}')
         self.outfile.close()
         os.system('pdflatex --shell-escape %s' % self.name)
 
-    class Section:
+    def create_section(self, title=None, numbered=True):
+        '''
+        Adds a new section to the document.
+        :param title:
+        :param numbered:
+        '''
+        self.sections.append(PyTexDocument.Section(title, numbered))
+
+    def add_section(self, section_object):
+        '''
+        Adds a section to the list
+        :param section_object:
+        '''
+        self.sections.append(section_object)
+
+    class Section(PyTexDocument):
         '''
         Creates a new section
         '''
@@ -158,8 +183,10 @@ class PyTexDocument:
             :param title:
             :param numbered:
             '''
+            self.contents    = ''
+            self.subsections = []
             if numbered:
                 sec = ''
             else:
                 sec = '*'
-            self.contents = ('\\section%s{%s}\n' %(title, sec))
+            self.contents += ('\\section%s{%s}\n' % (title, sec))
