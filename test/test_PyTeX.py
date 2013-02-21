@@ -93,5 +93,11 @@ class TestPyTeX(unittest.TestCase):
         outfile.close()
         return line_list
 
+    def test_full(self):
+        self.document1.title()
+        self.document1.section('First Section',
+                            [self.document1.raw_latex('Test code')])
+        self.document1.write()
+
 if __name__ == "__main__":
     unittest.main()

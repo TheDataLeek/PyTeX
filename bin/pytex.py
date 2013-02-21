@@ -95,7 +95,7 @@ class PyTexDocument:
         return formatted_list
 
     def equation(self, latex_math, label=None):
-        '''
+        '''        self.outfile.write('\\subsubsection{%s}\n' %title)
         Insert a new equation. Equation must be in LaTeX Form.
         :param latex_math:
         '''
@@ -108,6 +108,21 @@ class PyTexDocument:
         self.raw_latex(latex_math)
         self.outfile.write('\\end{aligned}\n')
         self.outfile.write('\\end{equation}\n')
+
+    def math(self, math, newline=False):
+        '''
+        Inserts inline math. Math must be in LaTeX form.
+        :param math:
+        :param newline:
+        '''
+        if newline:
+            self.outfile.write('\\[\n')
+            self.outfile.write('\\begin{aligned}\n')
+            self.raw_latex(math)
+            self.outfile.write('\\end{aligned}\n')
+            self.outfile.write('\\]\n')
+        else:
+            self.outfile.write('$ %s $' %math)
 
     def graph(self, array, options=None):
         '''
@@ -148,3 +163,39 @@ class PyTexDocument:
             self.outfile.write('\\caption{%s}\n' %caption)
         self.outfile.write('\\end{figure}\n')
 
+    def section(self, title='Section Title', contents=None):
+        '''
+        Creates a new section and writes contents
+        If no new sections are created, it will have everything in this one.
+        Note, contents are added in the order of the list.
+        :param title:
+        :param contents:
+        '''
+        self.outfile.write('\\section{%s}\n' %title)
+
+    def subsection(self, title='Subsection Title', contents=None):
+        '''
+        Creates a new subsection and writes contents
+        If no new subsections are created, it will have everything in this one.
+        Note, contents are added in the order of the list.
+        :param title:
+        :param contents:
+        '''
+        self.outfile.write('\\subsection{%s}\n' %title)
+
+    def subsubsection(self, title='Subsubsection Title', contents=None):
+        '''
+        Creates a new subsubsection and writes contents
+        If no new subsubsections are created, it will have everything in this one.
+        Note, contents are added in the order of the list.
+        :param title:
+        :param contents:
+        '''
+        self.outfile.write('\\subsubsection{%s}\n' %title)
+
+    def appendix(self, contents):
+        '''
+        Creates a new appendix. Note, the appendix needs sections.
+        :param contents:
+        '''
+        self.outfile.write('\\begin{appendix}\n' %title)
