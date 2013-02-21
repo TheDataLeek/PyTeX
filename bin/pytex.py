@@ -8,6 +8,7 @@ William Farmer
 IMPORT_FLAG = True
 import os
 import subprocess
+import re
 try:
     import numpy
     import scipy
@@ -73,11 +74,29 @@ class PyTexDocument:
         size = len(array[0])
         self.outfile.write('\\begin{tabular}{l%s}\n' % ((size - 1) * ' | l'))
         for entry in array:
+            formatted_array = self.detect_math(entry)
             self.outfile.write(str(entry[0]))
             for number in range(1, len(entry)):
                 self.outfile.write(' & %s' % (entry[number]))
             self.outfile.write('\\\\\n')
         self.outfile.write('\\end{tabular}\n')
+
+    def detect_math(self, entry):
+        '''
+        When given a list of strings, it detects any math bits and returns.
+        :param entry:
+        '''
+        formatted_list = []
+        for item in entry:
+            math_flag = False
+            for byte in item:
+                if re.search('0-9', byte):
+                    math_flag = True
+            if math_flag:
+                formatted_list.append('$%s$' %item)
+            else:
+                formatted_list.append(item)
+        return formatted_list
 
     def equation(self, latex_math, label=None):
         '''
