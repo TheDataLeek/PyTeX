@@ -18,6 +18,15 @@ def raw_latex(latex, content):
     content += latex
 
 
+def insert_text(text, content):
+    '''
+    Takes given text and appends it.
+    '''
+    formatted_list = detect_math(text.split(' '))
+    string = ' '.join(formatted_list)
+    content += string
+
+
 def picture(filename, content, scale=0.5, label=None, caption=None):
     """
     Insert a picture. Needs to be png
