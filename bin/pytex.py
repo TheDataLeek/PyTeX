@@ -155,21 +155,14 @@ class PyTexDocument:
         """
         self.content += ('\\title{%s}\n\\author{%s}\n\\date{%s}\n\\maketitle\n' % (title, author, date))
 
-    def close(self):
-        '''
-        Writes all objects to content
-        '''
-        for item in self.sections:
-            self.content += item.content
-
-    def write(self):
+    def write(self, compile=False):
         """
         End the document, close the file, and compile the pdf
         """
         self.outfile.write(self.content)
         self.outfile.write('\\end{document}')
-        self.outfile.close()
-        os.system('pdflatex --shell-escape %s' % self.name)
+        if compile:
+            os.system('pdflatex --shell-escape %s' % self.name)
 
     def create_section(self, title=None, numbered=True):
         """
@@ -225,154 +218,11 @@ class PyTexDocument:
         '''
         equation(math, self.content, label)
 
-    class Section:
-        """
-        Creates a new section
-        """
 
-        def __init__(self, title=None, numbered=True):
-            """
-            Initializes Class for usage
-            :param title:
-            :param numbered:
-            """
-            self.content = ''
-            self.subsections = []
-            if numbered:
-                sec = ''
-            else:
-                sec = '*'
-            self.content += ('\\section%s{%s}\n' % (title, sec))
-
-        def create_subsection(self, title=None, numbered=True):
-            """
-            Adds a new section to the document.
-            :param title:
-            :param numbered:
-            """
-            self.subsections.append(PyTexDocument.Section.SubSection(title, numbered))
-
-        def add_section(self, section_object):
-            """
-            Adds a section to the list
-            :param section_object:
-            """
-            self.subsections.append(section_object)
-
-        def close(self):
-            '''
-            Writes all subsections to content
-            '''
-            for item in self.subsections:
-                self.content += item.content
-
-        def raw_latex(self, latex):
-            """
-            Adds raw LaTeX code
-            :param latex:
-            """
-            raw_latex(latex, self.content)
-
-        def picture(self, filename, scale=0.5, label=None, caption=None):
-            '''
-            Adds a picture
-            :param filename:
-            :param scale:
-            :param label:
-            :param caption:
-            '''
-            picture(filename, self.content, scale, label, caption)
-
-        def table(self, array):
-            '''
-            Adds a table
-            :param array:
-            '''
-            table(array, self.content)
-
-        def math(self, math, newline=False):
-            '''
-            Adds inline or basic math
-            :param newline:
-            '''
-            math(math, self.content, newline)
-
-        def equation(self, math, label=None):
-            '''
-            Adds an official equation
-            :param math:
-            :param label:
-            '''
-            equation(math, self.content, label)
-
-            class SubSection:
-                """
-                Creates a new section
-                """
-
-                def __init__(self, title=None, numbered=True):
-                    """
-                    Initializes Class for usage
-                    :param title:
-                    :param numbered:
-                    """
-                    self.content = ''
-                    self.subsubsections = []
-                    if numbered:
-                        sec = ''
-                    else:
-                        sec = '*'
-                    self.content += ('\\section%s{%s}\n' % (title, sec))
-
-                def add_section(self, section_object):
-                    """
-                    Adds a section to the list
-                    :param section_object:
-                    """
-                    self.subsections.append(section_object)
-
-                def close(self):
-                    '''
-                    Writes all subsections to content
-                    '''
-                    for item in self.subsubsections:
-                        self.content += item.content
-
-                def raw_latex(self, latex):
-                    """
-                    Adds raw LaTeX code
-                    :param latex:
-                    """
-                    raw_latex(latex, self.content)
-
-                def picture(self, filename, scale=0.5, label=None, caption=None):
-                    '''
-                    Adds a picture
-                    :param filename:
-                    :param scale:
-                    :param label:
-                    :param caption:
-                    '''
-                    picture(filename, self.content, scale, label, caption)
-
-                def table(self, array):
-                    '''
-                    Adds a table
-                    :param array:
-                    '''
-                    table(array, self.content)
-
-                def math(self, math, newline=False):
-                    '''
-                    Adds inline or basic math
-                    :param newline:
-                    '''
-                    math(math, self.content, newline)
-
-                def equation(self, math, label=None):
-                    '''
-                    Adds an official equation
-                    :param math:
-                    :param label:
-                    '''
-                    equation(math, self.content, label)
+class node:
+    '''
+    Binary Search Tree for class objects
+    '''
+    def __init__(self, value=None):
+        left  = None
+        right = None

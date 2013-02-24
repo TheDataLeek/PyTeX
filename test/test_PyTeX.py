@@ -5,11 +5,12 @@ import os
 import unittest
 import logging
 
-open('./logs/test.log', mode='a').close()
+open('./logs/test.log', mode='w').close()
 logging.basicConfig(filename='./logs/test.log',
                     level=logging.DEBUG,
                     format='%(asctime)s\t-\t%(message)s')
 logging.info('Start Test Sequence\n')
+
 
 class TestPyTeX(unittest.TestCase):
     '''
@@ -22,68 +23,62 @@ class TestPyTeX(unittest.TestCase):
 
     def setUp(self):
         self.document1 = pytex.PyTexDocument(name='1.tex',
-                                                packages=[['geometry', 'margin=1in'],['times']])
+                                             packages=[['geometry', 'margin=1in'], ['times']])
         self.document2 = pytex.PyTexDocument(name='2.tex')
         self.document3 = pytex.PyTexDocument(name='3.tex',
-                                                doc_class='article',
-                                                packages=[['geometry', 'margin=1in'],['times']])
-
-    def tearDown(self):
-        os.system("for FILE in `find . -maxdepth 1 -type f | grep -e 'aux\|log'`; do mv $FILE ./logs/; done")
-        os.system("for FILE in `find . -maxdepth 1 -type f | grep -e 'pdf\|tex'`; do mv $FILE ./old/; done")
-
-    def test_graph(self):
-        array = [[0, 1, 2, 3, 4], [9, 8, 7, 6, 5]]
-        self.document1.graph(array)
-
+                                             doc_class='article',
+                                             packages=[['geometry', 'margin=1in'], ['times']])
 
     def test_basic_document(self):
-        self.document1.raw_latex('test string\n')
+        logging.info('TESTING BASIC DOCUMENT')
         self.document1.write()
         lines = self.get_line_list('1.tex')
+        for item in lines:
+            logging.info('  %s' %item.replace('\n', ''))
+        logging.info(lines)
         assert(lines == ['\\documentclass[10pt]{report}\n',
                         '\\usepackage[margin=1in]{geometry}\n',
                         '\\usepackage{times}\n',
                         '\\begin{document}\n',
-                        'test string\n',
                         '\\end{document}'])
 
     def test_title(self):
         self.document2.title(title='Test Document', author='William Farmer')
         self.document2.write()
         lines = self.get_line_list('2.tex')
-        assert(lines == ['\\documentclass[10pt]{report}\n',
-                        '\\usepackage[margin=1in]{geometry}\n',
-                        '\\begin{document}\n',
-                        '\\title{Test Document}\n',
-                        '\\author{William Farmer}\n',
-                        '\\date{\\today}\n',
-                        '\\maketitle\n',
-                        '\\end{document}'])
+        assert (lines == ['\\documentclass[10pt]{report}\n',
+                          '\\usepackage[margin=1in]{geometry}\n',
+                          '\\begin{document}\n',
+                          '\\title{Test Document}\n',
+                          '\\author{William Farmer}\n',
+                          '\\date{\\today}\n',
+                          '\\maketitle\n',
+                          '\\end{document}'])
 
     def test_table(self):
+        logging.info('TESTING TABLE CREATION')
         self.document3.title()
         array = [[1, 2, 3], [4, 5, 6], [7, 8, 9], ['a', 'b', 'c']]
         self.document3.table(array)
         self.document3.write()
         lines = self.get_line_list('3.tex')
         for item in lines:
-            logging.debug(item)
-        assert(lines == ['\\documentclass[10pt]{article}\n',
-                        '\\usepackage[margin=1in]{geometry}\n',
-                        '\\usepackage{times}\n',
-                        '\\begin{document}\n',
-                        '\\title{Insert Title Here}\n',
-                        '\\author{Insert Name Here}\n',
-                        '\\date{\\today}\n',
-                        '\\maketitle\n',
-                        '\\begin{tabular}{l | l | l}\n',
-                        '$1$ & $2$ & $3$\\\\\n',
-                        '$4$ & $5$ & $6$\\\\\n',
-                        '$7$ & $8$ & $9$\\\\\n',
-                        'a & b & c\\\\\n',
-                        '\\end{tabular}\n',
-                        '\\end{document}'])
+            logging.debug(item.replace('\n', ''))
+        assert (lines == ['\\documentclass[10pt]{article}\n',
+                          '\\usepackage[margin=1in]{geometry}\n',
+                          '\\usepackage{times}\n',
+                          '\\begin{document}\n',
+                          '\\title{Insert Title Here}\n',
+                          '\\author{Insert Name Here}\n',
+                          '\\date{\\today}\n',
+                          '\\maketitle\n',
+                          '\\begin{tabular}{l | l | l}\n',
+                          '$1$ & $2$ & $3$\\\\\n',
+                          '$4$ & $5$ & $6$\\\\\n',
+                          '$7$ & $8$ & $9$\\\\\n',
+                          'a & b & c\\\\\n',
+                          '\\end{tabular}\n',
+                          '\\end{document}'])
 
     def get_line_list(self, name):
         outfile = open(name, mode='r')
@@ -93,11 +88,6 @@ class TestPyTeX(unittest.TestCase):
         outfile.close()
         return line_list
 
-    def test_full(self):
-        self.document1.title()
-        self.document1.section('First Section',
-                            [self.document1.raw_latex('Test code')])
-        self.document1.write()
 
 if __name__ == "__main__":
     unittest.main()
