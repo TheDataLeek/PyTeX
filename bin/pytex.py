@@ -107,7 +107,7 @@ def equation(latex_math, content, label=None):
     else:
         content += ('\\begin{equation}\n')
     content += ('\\begin{aligned}\n')
-    raw_latex(latex_math)
+    content += latex_math + '\n'
     content += ('\\end{aligned}\n')
     content += ('\\end{equation}\n')
 
@@ -125,26 +125,27 @@ class PyTexDocument:
         :param options:
         :param packages:
         """
-        self.content = ''
+        global file_count
+        file_count    = 0
+        self.content  = ''
         self.sections = []
         if not packages:
-            packages = [['geometry', 'margin=1in']]
+            packages  = [['geometry', 'margin = 1in']]
         if not options:
-            options = ['10pt']
-        self.name = name
-        self.outfile = open(self.name, mode='w')
+            options   = ['10pt']
+        self.name     = name
 
-        self.outfile.write('\\documentclass[')
+        self.content += '\\documentclass['
         for number in range(len(options) - 2):
-            self.outfile.write('%s, ' % options[number])
-        self.outfile.write('%s]{%s}\n' % (options[len(options) - 1], doc_class))
+            self.content += '%s, ' % options[number]
+        self.content += '%s]{%s}\n' % (options[len(options) - 1], doc_class)
 
         for item in packages:
             try:
-                self.outfile.write('\\usepackage[%s]{%s}\n' % (item[1], item[0]))
+                self.content += '\\usepackage[%s]{%s}\n' % (item[1], item[0])
             except IndexError:
-                self.outfile.write('\\usepackage{%s}\n' % item[0])
-        self.outfile.write('\\begin{document}\n')
+                self.content += '\\usepackage{%s}\n' % item[0]
+        self.content += '\\begin{document}\n'
 
     def title(self, title='Insert Title Here', author='Insert Name Here', date='\\today'):
         """
@@ -159,25 +160,11 @@ class PyTexDocument:
         """
         End the document, close the file, and compile the pdf
         """
-        self.outfile.write(self.content)
-        self.outfile.write('\\end{document}')
+        self.content += '\\end{document}'
+        outfile = open(self.name, mode='w')
+        outfile.write(self.content)
         if compile:
             os.system('pdflatex --shell-escape %s' % self.name)
-
-    def create_section(self, title=None, numbered=True):
-        """
-        Adds a new section to the document.
-        :param title:
-        :param numbered:
-        """
-        self.sections.append(PyTexDocument.Section(title, numbered))
-
-    def add_section(self, section_object):
-        """
-        Adds a section to the list
-        :param section_object:
-        """
-        self.sections.append(section_object)
 
     def raw_latex(self, latex):
         """
@@ -218,11 +205,70 @@ class PyTexDocument:
         '''
         equation(math, self.content, label)
 
+    def section(self, title, numbered=True):
+        '''
+        Creates a new section with given title
+        '''
+        new_section = Section(title, numbered)
+        self.sections.append(new_section)
+        self.content += '\\input(%s)\n' %('section_%s.tex' %title)
+        return new_section
 
-class node:
+class Section:
     '''
-    Binary Search Tree for class objects
+    Section class
     '''
-    def __init__(self, value=None):
-        left  = None
-        right = None
+    def __init__(self, title, numbered):
+        if numbered:
+            star = ''
+        else:
+            star = '*'
+        self.new_section = open('section%i.tex' %file_count, 'w')
+        file_count      += 1
+        self.content     = '\section%s{%s}\n' %(star, title)
+
+    def write(self):
+        """
+        Write the section and close file
+        """
+        self.new_section.write(self.content)
+        self.new_section.close()
+
+    def raw_latex(self, latex):
+        """
+        Adds raw LaTeX code
+        :param latex:
+        """
+        raw_latex(latex, self.content)
+
+    def picture(self, filename, scale=0.5, label=None, caption=None):
+        '''
+        Adds a picture
+        :param filename:
+        :param scale:
+        :param label:
+        :param caption:
+        '''
+        picture(filename, self.content, scale, label, caption)
+
+    def table(self, array):
+        '''
+        Adds a table
+        :param array:
+        '''
+        table(array, self.content)
+
+    def math(self, math, newline=False):
+        '''
+        Adds inline or basic math
+        :param newline:
+        '''
+        math(math, self.content, newline)
+
+    def equation(self, math, label=None):
+        '''
+        Adds an official equation
+        :param math:
+        :param label:
+        '''
+        equation(math, self.content, label)

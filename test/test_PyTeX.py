@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
 import pytex
-import os
 import unittest
 import logging
 
-open('./logs/test.log', mode='w').close()
-logging.basicConfig(filename='./logs/test.log',
+open('test.log', mode='w').close()
+logging.basicConfig(filename='test.log',
                     level=logging.DEBUG,
                     format='%(asctime)s\t-\t%(message)s')
 logging.info('Start Test Sequence\n')
@@ -32,62 +31,106 @@ class TestPyTeX(unittest.TestCase):
     def test_basic_document(self):
         logging.info('TESTING BASIC DOCUMENT')
         self.document1.write()
-        lines = self.get_line_list('1.tex')
-        for item in lines:
-            logging.info('  %s' %item.replace('\n', ''))
-        logging.info(lines)
-        assert(lines == ['\\documentclass[10pt]{report}\n',
-                        '\\usepackage[margin=1in]{geometry}\n',
-                        '\\usepackage{times}\n',
-                        '\\begin{document}\n',
-                        '\\end{document}'])
+        logging.info('\n' + self.document1.content)
+        assert(self.document1.content == ('\\documentclass[10pt]{report}\n' +
+                                          '\\usepackage[margin=1in]{geometry}\n' +
+                                          '\\usepackage{times}\n' +
+                                          '\\begin{document}\n' +
+                                          '\\end{document}'))
+        self.document2.write()
+        logging.info('\n' + self.document2.content)
+        assert(self.document2.content == ('\\documentclass[10pt]{report}\n' +
+                                          '\\usepackage[margin=1in]{geometry}\n' +
+                                          '\\begin{document}\n' +
+                                          '\\end{document}'))
+        self.document3.write()
+        logging.info('\n' + self.document3.content)
+        assert(self.document3.content == ('\\documentclass[10pt]{article}\n' +
+                                          '\\usepackage[margin=1in]{geometry}\n' +
+                                          '\\usepackage{times}\n' +
+                                          '\\begin{document}\n' +
+                                          '\\end{document}'))
 
     def test_title(self):
-        self.document2.title(title='Test Document', author='William Farmer')
+        logging.info('Testing Title Functionality')
+        self.document1.title('Test Document', 'Will Farmer')
+        self.document1.write()
+        logging.info('\n' + self.document1.content)
+        assert(self.document1.content == ('\\documentclass[10pt]{report}\n' +
+                                          '\\usepackage[margin=1in]{geometry}\n' +
+                                          '\\usepackage{times}\n' +
+                                          '\\begin{document}\n' +
+                                          '\\title{Test Document}\n' +
+                                          '\\author{Will Farmer}\n' +
+                                          '\\date{\\today}\n' +
+                                          '\\maketitle\n' +
+                                          '\\end{document}'))
+        self.document2.title()
         self.document2.write()
-        lines = self.get_line_list('2.tex')
-        assert (lines == ['\\documentclass[10pt]{report}\n',
-                          '\\usepackage[margin=1in]{geometry}\n',
-                          '\\begin{document}\n',
-                          '\\title{Test Document}\n',
-                          '\\author{William Farmer}\n',
-                          '\\date{\\today}\n',
-                          '\\maketitle\n',
-                          '\\end{document}'])
-
-    def test_table(self):
-        logging.info('TESTING TABLE CREATION')
-        self.document3.title()
-        array = [[1, 2, 3], [4, 5, 6], [7, 8, 9], ['a', 'b', 'c']]
-        self.document3.table(array)
+        logging.info('\n' + self.document2.content)
+        assert(self.document2.content == ('\\documentclass[10pt]{report}\n' +
+                                          '\\usepackage[margin=1in]{geometry}\n' +
+                                          '\\begin{document}\n' +
+                                          '\\title{Insert Title Here}\n' +
+                                          '\\author{Insert Name Here}\n' +
+                                          '\\date{\\today}\n' +
+                                          '\\maketitle\n' +
+                                          '\\end{document}'))
+        self.document3.title('Test Document', 'Will Farmer', '2013/03/20')
         self.document3.write()
-        lines = self.get_line_list('3.tex')
-        for item in lines:
-            logging.debug(item.replace('\n', ''))
-        assert (lines == ['\\documentclass[10pt]{article}\n',
-                          '\\usepackage[margin=1in]{geometry}\n',
-                          '\\usepackage{times}\n',
-                          '\\begin{document}\n',
-                          '\\title{Insert Title Here}\n',
-                          '\\author{Insert Name Here}\n',
-                          '\\date{\\today}\n',
-                          '\\maketitle\n',
-                          '\\begin{tabular}{l | l | l}\n',
-                          '$1$ & $2$ & $3$\\\\\n',
-                          '$4$ & $5$ & $6$\\\\\n',
-                          '$7$ & $8$ & $9$\\\\\n',
-                          'a & b & c\\\\\n',
-                          '\\end{tabular}\n',
-                          '\\end{document}'])
+        logging.info('\n' + self.document3.content)
+        assert(self.document3.content == ('\\documentclass[10pt]{article}\n' +
+                                          '\\usepackage[margin=1in]{geometry}\n' +
+                                          '\\usepackage{times}\n' +
+                                          '\\begin{document}\n' +
+                                          '\\title{Test Document}\n' +
+                                          '\\author{Will Farmer}\n' +
+                                          '\\date{2013/03/20}\n' +
+                                          '\\maketitle\n' +
+                                          '\\end{document}'))
 
-    def get_line_list(self, name):
-        outfile = open(name, mode='r')
-        line_list = []
-        for item in outfile.readlines():
-            line_list.append(item)
-        outfile.close()
-        return line_list
+    def test_section(self):
+        logging.info('TESTING SECTION CREATION')
+        self.document1.title('Test Document', 'Will Farmer')
 
+        section1 = self.document1.section('This is a section', True)
+        section1.equation('5x^2 = 6x')
+
+        self.document1.write()
+        logging.info('\n' + self.document1.content)
+        assert(self.document1.content == ('\\documentclass[10pt]{report}\n' +
+                                          '\\usepackage[margin=1in]{geometry}\n' +
+                                          '\\usepackage{times}\n' +
+                                          '\\begin{document}\n' +
+                                          '\\title{Test Document}\n' +
+                                          '\\author{Will Farmer}\n' +
+                                          '\\date{\\today}\n' +
+                                          '\\maketitle\n' +
+                                          '\\input{section0.tex' +
+                                          '\\end{document}'))
+        self.document2.title()
+        self.document2.write()
+        logging.info('\n' + self.document2.content)
+        assert(self.document2.content == ('\\documentclass[10pt]{report}\n' +
+                                          '\\usepackage[margin=1in]{geometry}\n' +
+                                          '\\begin{document}\n' +
+                                          '\\title{Insert Title Here}\n' +
+                                          '\\author{Insert Name Here}\n' +
+                                          '\\date{\\today}\n' +
+                                          '\\maketitle\n' +
+                                          '\\end{document}'))
+        self.document3.title('Test Document', 'Will Farmer', '2013/03/20')
+        self.document3.write()
+        logging.info('\n' + self.document3.content)
+        assert(self.document3.content == ('\\documentclass[10pt]{article}\n' +
+                                          '\\usepackage[margin=1in]{geometry}\n' +
+                                          '\\usepackage{times}\n' +
+                                          '\\begin{document}\n' +
+                                          '\\title{Test Document}\n' +
+                                          '\\author{Will Farmer}\n' +
+                                          '\\date{2013/03/20}\n' +
+                                          '\\maketitle\n' +
+                                          '\\end{document}'))
 
 if __name__ == "__main__":
     unittest.main()
