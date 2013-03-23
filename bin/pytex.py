@@ -16,6 +16,7 @@ def raw_latex(latex, content):
     :param content:
     """
     content += latex
+    return content
 
 
 def insert_text(text, content):
@@ -25,6 +26,7 @@ def insert_text(text, content):
     formatted_list = detect_math(text.split(' '))
     string = ' '.join(formatted_list)
     content += string
+    return content
 
 
 def picture(filename, content, scale=0.5, label=None, caption=None):
@@ -44,6 +46,7 @@ def picture(filename, content, scale=0.5, label=None, caption=None):
     if caption:
         content += '\\caption{%s}\n' % caption
     content += '\\end{figure}\n'
+    return content
 
 
 def table(array, content):
@@ -61,6 +64,7 @@ def table(array, content):
             content += (' & %s' % (formatted_array[number]))
         content += ('\\\\\n')
     content += ('\\end{tabular}\n')
+    return content
 
 
 def math(math, content, newline=False):
@@ -78,6 +82,7 @@ def math(math, content, newline=False):
         content += ('\\]\n')
     else:
         content += ('$ %s $' % math)
+    return content
 
 
 def detect_math(entry):
@@ -110,6 +115,7 @@ def equation(latex_math, content, label=None):
     content += latex_math + '\n'
     content += ('\\end{aligned}\n')
     content += ('\\end{equation}\n')
+    return content
 
 
 class PyTexDocument:
@@ -125,12 +131,11 @@ class PyTexDocument:
         :param options:
         :param packages:
         """
-        global file_count
-        file_count    = 0
-        self.content  = ''
-        self.sections = []
+        self.file_count = 0
+        self.content    = ''
+        self.sections   = []
         if not packages:
-            packages  = [['geometry', 'margin = 1in']]
+            packages  = [['geometry', 'margin=1in']]
         if not options:
             options   = ['10pt']
         self.name     = name
@@ -160,7 +165,7 @@ class PyTexDocument:
         """
         End the document, close the file, and compile the pdf
         """
-        self.content += '\\end{document}'
+        self.content += '\n\\end{document}'
         outfile = open(self.name, mode='w')
         outfile.write(self.content)
         if compile:
@@ -171,7 +176,7 @@ class PyTexDocument:
         Adds raw LaTeX code
         :param latex:
         """
-        raw_latex(latex, self.content)
+        self.content = raw_latex(latex, self.content)
 
     def picture(self, filename, scale=0.5, label=None, caption=None):
         '''
@@ -181,21 +186,27 @@ class PyTexDocument:
         :param label:
         :param caption:
         '''
-        picture(filename, self.content, scale, label, caption)
+        self.content = picture(filename, self.content, scale, label, caption)
 
     def table(self, array):
         '''
         Adds a table
         :param array:
         '''
-        table(array, self.content)
+        self.content = table(array, self.content)
 
-    def math(self, math, newline=False):
+    def math(self, user_math, newline=False):
         '''
         Adds inline or basic math
         :param newline:
         '''
-        math(math, self.content, newline)
+        self.content = math(user_math, self.content, newline)
+
+    def latex(self, user_tex):
+        '''
+        Adds user LaTeX code to document
+        '''
+        self.content = raw_latex(user_tex, self.content)
 
     def equation(self, math, label=None):
         '''
@@ -203,28 +214,38 @@ class PyTexDocument:
         :param math:
         :param label:
         '''
-        equation(math, self.content, label)
+        self.content = equation(math, self.content, label)
+
+    def text(self, user_text):
+        '''
+        Adds user content to the file.
+        By nature this will be a new paragraph.
+        '''
+        self.content = insert_text(user_text, self.content)
 
     def section(self, title, numbered=True):
         '''
         Creates a new section with given title
         '''
-        new_section = Section(title, numbered)
+        new_section = Section(title, numbered, self.file_count)
         self.sections.append(new_section)
-        self.content += '\\input(%s)\n' %('section_%s.tex' %title)
+        self.content += '\\input{%s}\n' %('section_%s.tex' %self.file_count)
+        self.file_count += 1
         return new_section
+
 
 class Section:
     '''
     Section class
     '''
-    def __init__(self, title, numbered):
+
+    def __init__(self, title, numbered, name):
         if numbered:
             star = ''
         else:
             star = '*'
-        self.new_section = open('section%i.tex' %file_count, 'w')
-        file_count      += 1
+        self.new_section = open('section%i.tex' %name, 'w')
+        name            += 1
         self.content     = '\section%s{%s}\n' %(star, title)
 
     def write(self):
@@ -239,7 +260,7 @@ class Section:
         Adds raw LaTeX code
         :param latex:
         """
-        raw_latex(latex, self.content)
+        self.content = raw_latex(latex, self.content)
 
     def picture(self, filename, scale=0.5, label=None, caption=None):
         '''
@@ -249,21 +270,21 @@ class Section:
         :param label:
         :param caption:
         '''
-        picture(filename, self.content, scale, label, caption)
+        self.content = picture(filename, self.content, scale, label, caption)
 
     def table(self, array):
         '''
         Adds a table
         :param array:
         '''
-        table(array, self.content)
+        self.content = table(array, self.content)
 
     def math(self, math, newline=False):
         '''
         Adds inline or basic math
         :param newline:
         '''
-        math(math, self.content, newline)
+        self.content = math(math, self.content, newline)
 
     def equation(self, math, label=None):
         '''
@@ -271,4 +292,4 @@ class Section:
         :param math:
         :param label:
         '''
-        equation(math, self.content, label)
+        self.content = equation(math, self.content, label)

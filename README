@@ -1,4 +1,27 @@
 PyTeX
 ===============
 
-PyTeX is a LaTeX API written in python.
+PyTeX is a LaTeX API written in python. It offers functionality to be able to write LaTeX documents from within an automated report.
+
+The intent behind this API is to allow users to write data analysis reports quickly and easily and for the reports to be updated every time the analysis is generated. Each time the code is run, a new .tex file is created which can be compiled later into a full-fledged pdf document.
+
+Functionality Offered
+=====================
+* Basic Text -> Adds new text to the document. This will auto-detect math formatting and insert the correct LaTeX delimiters to allow the best LaTeX support.
+    * document.text(<text to insert>)
+* Equation -> Adds an official equation. Official equations are numbered and treated a little differently than unofficial ones or just in-line math.
+    * document.equation(<math to insert>, <label=None>)
+* Math -> Adds in-line or unofficial math. Some latex syntax is recommended for this function as it relies on built-in features for support.
+    * document.math(<math to insert>, <newline=False>)
+* Picture Input -> Adds pictures to the report. As of now png files are best supported, and therefore best recommended. With this command, just specify the picture file and it will do the rest.
+    * document.picture(<filename>, <scale to display>, <label=None>, <caption=None>
+* Raw LaTeX Code -> This allows users that know LaTeX to have full control over the content of their documents. If you are unsatisfied with the functionality offered by this API, feel free to learn more advanced LaTeX commands and utilize them within your reports.
+    * document.latex(<raw LaTeX code>)
+* Section -> Adds a new section. All sections have all the same functionality that each of the parent documents have.
+    * document.section(<title>, <numbered=True>)
+* Table -> With a given array it will generate a correctly formatted table with correct delimiters for math content.
+    * document.table(<array>)
+* Title -> Adds a title, author, and date to the file.
+    * document.title(<title>, <author>, <date>)
+* Write -> Ends and closes the document.
+    * document.write()

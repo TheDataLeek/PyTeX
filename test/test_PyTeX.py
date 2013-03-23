@@ -7,7 +7,7 @@ import logging
 open('test.log', mode='w').close()
 logging.basicConfig(filename='test.log',
                     level=logging.DEBUG,
-                    format='%(asctime)s\t-\t%(message)s')
+                    format='%(asctime)s\t-%(message)s')
 logging.info('Start Test Sequence\n')
 
 
@@ -30,32 +30,43 @@ class TestPyTeX(unittest.TestCase):
 
     def test_basic_document(self):
         logging.info('TESTING BASIC DOCUMENT')
+
         self.document1.write()
-        logging.info('\n' + self.document1.content)
+        self.document2.write()
+        self.document3.write()
+        logging.info('\n			' + self.document1.content.replace('\n', '\n			'))
+        logging.info('\n			' + self.document2.content.replace('\n', '\n			'))
+        logging.info('\n			' + self.document3.content.replace('\n', '\n			'))
         assert(self.document1.content == ('\\documentclass[10pt]{report}\n' +
                                           '\\usepackage[margin=1in]{geometry}\n' +
                                           '\\usepackage{times}\n' +
                                           '\\begin{document}\n' +
-                                          '\\end{document}'))
-        self.document2.write()
-        logging.info('\n' + self.document2.content)
+                                          '\n\\end{document}'))
         assert(self.document2.content == ('\\documentclass[10pt]{report}\n' +
                                           '\\usepackage[margin=1in]{geometry}\n' +
                                           '\\begin{document}\n' +
-                                          '\\end{document}'))
-        self.document3.write()
-        logging.info('\n' + self.document3.content)
+                                          '\n\\end{document}'))
         assert(self.document3.content == ('\\documentclass[10pt]{article}\n' +
                                           '\\usepackage[margin=1in]{geometry}\n' +
                                           '\\usepackage{times}\n' +
                                           '\\begin{document}\n' +
-                                          '\\end{document}'))
+                                          '\n\\end{document}'))
 
-    def test_title(self):
-        logging.info('Testing Title Functionality')
+    def test_doc_math(self):
+        logging.info('Testing Math Functionality')
+
         self.document1.title('Test Document', 'Will Farmer')
+        self.document1.math('5x^2 + 4x = 0')
         self.document1.write()
-        logging.info('\n' + self.document1.content)
+        self.document2.title()
+        self.document2.write()
+        self.document3.title('Test Document', 'Will Farmer', '2013/03/20')
+        self.document3.write()
+
+        logging.info('\n			' + self.document1.content.replace('\n', '\n			'))
+        logging.info('\n			' + self.document2.content.replace('\n', '\n			'))
+        logging.info('\n			' + self.document3.content.replace('\n', '\n			'))
+
         assert(self.document1.content == ('\\documentclass[10pt]{report}\n' +
                                           '\\usepackage[margin=1in]{geometry}\n' +
                                           '\\usepackage{times}\n' +
@@ -64,10 +75,8 @@ class TestPyTeX(unittest.TestCase):
                                           '\\author{Will Farmer}\n' +
                                           '\\date{\\today}\n' +
                                           '\\maketitle\n' +
+                                          '$ 5x^2 + 4x = 0 $\n' +
                                           '\\end{document}'))
-        self.document2.title()
-        self.document2.write()
-        logging.info('\n' + self.document2.content)
         assert(self.document2.content == ('\\documentclass[10pt]{report}\n' +
                                           '\\usepackage[margin=1in]{geometry}\n' +
                                           '\\begin{document}\n' +
@@ -75,10 +84,7 @@ class TestPyTeX(unittest.TestCase):
                                           '\\author{Insert Name Here}\n' +
                                           '\\date{\\today}\n' +
                                           '\\maketitle\n' +
-                                          '\\end{document}'))
-        self.document3.title('Test Document', 'Will Farmer', '2013/03/20')
-        self.document3.write()
-        logging.info('\n' + self.document3.content)
+                                          '\n\\end{document}'))
         assert(self.document3.content == ('\\documentclass[10pt]{article}\n' +
                                           '\\usepackage[margin=1in]{geometry}\n' +
                                           '\\usepackage{times}\n' +
@@ -87,7 +93,47 @@ class TestPyTeX(unittest.TestCase):
                                           '\\author{Will Farmer}\n' +
                                           '\\date{2013/03/20}\n' +
                                           '\\maketitle\n' +
-                                          '\\end{document}'))
+                                          '\n\\end{document}'))
+
+    def test_title(self):
+        logging.info('Testing Title Functionality')
+        self.document1.title('Test Document', 'Will Farmer')
+        self.document1.write()
+        self.document2.title()
+        self.document2.write()
+        self.document3.title('Test Document', 'Will Farmer', '2013/03/20')
+        self.document3.write()
+
+        logging.info('\n			' + self.document1.content.replace('\n', '\n			'))
+        logging.info('\n			' + self.document2.content.replace('\n', '\n			'))
+        logging.info('\n			' + self.document3.content.replace('\n', '\n			'))
+
+        assert(self.document1.content == ('\\documentclass[10pt]{report}\n' +
+                                          '\\usepackage[margin=1in]{geometry}\n' +
+                                          '\\usepackage{times}\n' +
+                                          '\\begin{document}\n' +
+                                          '\\title{Test Document}\n' +
+                                          '\\author{Will Farmer}\n' +
+                                          '\\date{\\today}\n' +
+                                          '\\maketitle\n' +
+                                          '\n\\end{document}'))
+        assert(self.document2.content == ('\\documentclass[10pt]{report}\n' +
+                                          '\\usepackage[margin=1in]{geometry}\n' +
+                                          '\\begin{document}\n' +
+                                          '\\title{Insert Title Here}\n' +
+                                          '\\author{Insert Name Here}\n' +
+                                          '\\date{\\today}\n' +
+                                          '\\maketitle\n' +
+                                          '\n\\end{document}'))
+        assert(self.document3.content == ('\\documentclass[10pt]{article}\n' +
+                                          '\\usepackage[margin=1in]{geometry}\n' +
+                                          '\\usepackage{times}\n' +
+                                          '\\begin{document}\n' +
+                                          '\\title{Test Document}\n' +
+                                          '\\author{Will Farmer}\n' +
+                                          '\\date{2013/03/20}\n' +
+                                          '\\maketitle\n' +
+                                          '\n\\end{document}'))
 
     def test_section(self):
         logging.info('TESTING SECTION CREATION')
@@ -95,9 +141,18 @@ class TestPyTeX(unittest.TestCase):
 
         section1 = self.document1.section('This is a section', True)
         section1.equation('5x^2 = 6x')
+        section1.write()
 
         self.document1.write()
-        logging.info('\n' + self.document1.content)
+        self.document2.title()
+        self.document2.write()
+        self.document3.title('Test Document', 'Will Farmer', '2013/03/20')
+        self.document3.write()
+
+        logging.info('\n			' + self.document1.content.replace('\n', '\n			'))
+        logging.info('\n			' + self.document2.content.replace('\n', '\n			'))
+        logging.info('\n			' + self.document3.content.replace('\n', '\n			'))
+
         assert(self.document1.content == ('\\documentclass[10pt]{report}\n' +
                                           '\\usepackage[margin=1in]{geometry}\n' +
                                           '\\usepackage{times}\n' +
@@ -106,11 +161,8 @@ class TestPyTeX(unittest.TestCase):
                                           '\\author{Will Farmer}\n' +
                                           '\\date{\\today}\n' +
                                           '\\maketitle\n' +
-                                          '\\input{section0.tex' +
-                                          '\\end{document}'))
-        self.document2.title()
-        self.document2.write()
-        logging.info('\n' + self.document2.content)
+                                          '\\input{section_0.tex}\n' +
+                                          '\n\\end{document}'))
         assert(self.document2.content == ('\\documentclass[10pt]{report}\n' +
                                           '\\usepackage[margin=1in]{geometry}\n' +
                                           '\\begin{document}\n' +
@@ -118,10 +170,7 @@ class TestPyTeX(unittest.TestCase):
                                           '\\author{Insert Name Here}\n' +
                                           '\\date{\\today}\n' +
                                           '\\maketitle\n' +
-                                          '\\end{document}'))
-        self.document3.title('Test Document', 'Will Farmer', '2013/03/20')
-        self.document3.write()
-        logging.info('\n' + self.document3.content)
+                                          '\n\\end{document}'))
         assert(self.document3.content == ('\\documentclass[10pt]{article}\n' +
                                           '\\usepackage[margin=1in]{geometry}\n' +
                                           '\\usepackage{times}\n' +
@@ -130,7 +179,7 @@ class TestPyTeX(unittest.TestCase):
                                           '\\author{Will Farmer}\n' +
                                           '\\date{2013/03/20}\n' +
                                           '\\maketitle\n' +
-                                          '\\end{document}'))
+                                          '\n\\end{document}'))
 
 if __name__ == "__main__":
     unittest.main()
