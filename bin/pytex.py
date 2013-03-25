@@ -26,6 +26,7 @@ def insert_text(text, content):
     formatted_list = detect_math(text.split(' '))
     string = ' '.join(formatted_list)
     content += string
+    content += '\\\\\\\\\n'
     return content
 
 
